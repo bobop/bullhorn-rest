@@ -1,10 +1,12 @@
 module Bullhorn
 module Rest
 
+class AuthenticationError < StandardError; end
+
 # http://supportforums.bullhorn.com/viewtopic.php?f=104&t=14542
 module Authentication
 
-  attr_accessor :username, :password, :client_id, :client_secret, :auth_code, :access_token, :access_token_expires_at, :refresh_token, :ttl, :rest_token
+  attr_accessor :username, :password, :client_id, :client_secret, :auth_code, :access_token, :access_token_expires_at, :refresh_token, :ttl, :rest_token, :errors
 
   # Use a separate connection for authentication
   def auth_conn
@@ -36,6 +38,11 @@ module Authentication
     res = auth_conn.post url, params
     hash = JSON.parse(res.body)
 
+    if hash.keys.include?('errorCode')
+      self.errors = hash
+      raise Bullhorn::Rest::AuthenticationError
+    end
+
     self.access_token = hash['access_token']
     self.access_token_expires_at = hash['expires_in'].to_i.seconds.from_now
     self.refresh_token = hash['refresh_token']
@@ -52,6 +59,11 @@ module Authentication
     res = auth_conn.post url, params
     hash = JSON.parse(res.body)
 
+    if hash.keys.include?('errorCode')
+      self.errors = hash
+      raise Bullhorn::Rest::AuthenticationError
+    end
+
     self.access_token = hash['access_token']
     self.access_token_expires_at = hash['expires_in'].to_i.seconds.from_now
     self.refresh_token = hash['refresh_token']
@@ -66,6 +78,11 @@ module Authentication
     params[:ttl] = ttl if ttl
     response = auth_conn.get url, params
     hash = JSON.parse(response.body)
+
+    if hash.keys.include?('errorCode')
+      self.errors = hash
+      raise Bullhorn::Rest::AuthenticationError
+    end
 
     self.rest_token = hash['BhRestToken']
     self.rest_url = hash['restUrl']
