@@ -8,13 +8,32 @@ module Authentication
 
   attr_accessor :username, :password, :client_id, :client_secret, :auth_code, :access_token, :access_token_expires_at, :refresh_token, :ttl, :rest_token, :errors
 
+  # Allow configuration of auth host
+  def auth_host=(host)
+    @auth_host = host
+  end
+
+  def auth_host
+    @auth_host ||= "auth.bullhornstaffing.com"
+  end
+
+  # Allow configuration of rest host
+  def rest_host=(host)
+    @rest_host = host
+  end
+
+  def rest_host
+    @rest_host ||= "rest.bullhornstaffing.com"
+  end
+
+
   # Use a separate connection for authentication
   def auth_conn
     @auth_conn ||= Faraday.new
   end
 
   def authorize
-    url = "https://auth.bullhornstaffing.com/oauth/authorize"
+    url = "https://#{self.auth_host}/oauth/authorize"
     params = {
       client_id: client_id,
       username: username,
@@ -28,7 +47,7 @@ module Authentication
   end
 
   def retrieve_tokens
-    url = "https://auth.bullhornstaffing.com/oauth/token"
+    url = "https://#{self.auth_host}/oauth/token"
     params = {
       grant_type: 'authorization_code',
       code: auth_code,
@@ -49,7 +68,7 @@ module Authentication
   end
 
   def refresh_tokens
-    url = "https://auth.bullhornstaffing.com/oauth/token"
+    url = "https://#{self.auth_host}/oauth/token"
     params = {
       grant_type: 'refresh_token',
       refresh_token: refresh_token,
@@ -70,7 +89,7 @@ module Authentication
   end
 
   def login
-    url = "https://rest.bullhornstaffing.com/rest-services/login"
+    url = "https://#{self.rest_host}/rest-services/login"
     params = {
       version: '*',
       access_token: access_token
