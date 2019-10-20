@@ -1,5 +1,5 @@
-require "codeclimate-test-reporter"
-CodeClimate::TestReporter.start
+require 'simplecov'
+SimpleCov.start
 $:.unshift File.dirname(__FILE__)
 
 require 'rspec'
