@@ -109,6 +109,7 @@ module Authentication
 
   def authenticate
     expire if expired?
+    before_authenticate
     unless rest_token
       unless access_token
         if refresh_token
@@ -149,6 +150,10 @@ module Authentication
 
   # Callback that can be overridden
   def did_authenticate
+  end
+
+  # Callback that can be overridden
+  def before_authenticate
   end
 
   # Makes sure the client is authenticated
